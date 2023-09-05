@@ -1,5 +1,5 @@
+import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { categoriesRefreshTime } from '@freelance/constants';
 import useAppSelector from '@hooks/useAppSelector';
 import { useGetAllPropertiesQuery } from 'redux/properties/properties-api';
 import { setProperties } from 'redux/properties/properties-slice';
@@ -24,22 +24,16 @@ const useProperties = (): {
   getOptionsForSelectString: (property: string[]) => SelectOptionString[];
 } => {
   const dispatch = useDispatch();
-  const {
-    categories,
-    englishLevels,
-    durationAmount,
-    availableTime,
-    skills,
-    lastUpdate,
-  } = useAppSelector(state => state.properties);
+  const { categories, englishLevels, durationAmount, availableTime, skills } =
+    useAppSelector(state => state.properties);
 
-  const { data, isSuccess } = useGetAllPropertiesQuery(undefined, {
-    skip: !(Date.now() - lastUpdate > categoriesRefreshTime),
-  });
+  const { data, isSuccess } = useGetAllPropertiesQuery(undefined, {});
 
-  if (isSuccess) {
-    dispatch(setProperties({ ...data, lastUpdate: Date.now() }));
-  }
+  useEffect(() => {
+    if (isSuccess) {
+      dispatch(setProperties({ ...data, lastUpdate: Date.now() }));
+    }
+  }, [data, dispatch, isSuccess]);
 
   const getOptionsForSelectWithId = (
     property: Property[],
